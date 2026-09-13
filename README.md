@@ -4,7 +4,7 @@ Launcher Windows Tauri 2 pour ouvrir Orbit Shadow dans le navigateur de jeu four
 
 ## Interface
 
-Le launcher affiche une planète en éclipse, un symbole orbital vectoriel et un bouton Jouer. Le fond est animé avec discrétion ; le bouton « Animations » permet de le figer et la préférence système de réduction des animations est respectée. L’interface tient dans la fenêtre native de 640 × 480 pixels.
+Le launcher affiche une planète en éclipse, un symbole orbital vectoriel et un bouton Jouer. Le bouton Discord en haut à droite ouvre https://discord.gg/orbit-shadow dans le navigateur par défaut. Le fond est animé avec discrétion ; le bouton « Animations » permet de le figer et la préférence système de réduction des animations est respectée. L’interface tient dans la fenêtre native de 640 × 480 pixels.
 
 Le frontend se trouve dans `src/` et fonctionne sans CDN ni police distante. Ouvrir `src/index.html` dans un navigateur donne un aperçu visuel. Dans Tauri, Jouer utilise la commande native existante `open_game`. Les demandes simultanées sont bloquées et le bouton redevient disponible après un succès ou une erreur.
 

@@ -23,6 +23,14 @@ jobs:
           cache: npm
       - name: Select stable Rust
         run: rustup default stable
+      - name: Restore compiled Rust dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: windows-rust-${{ hashFiles('src-tauri/Cargo.lock') }}
       - name: Install launcher tools
         run: npm ci
       - name: Verify launcher interactions

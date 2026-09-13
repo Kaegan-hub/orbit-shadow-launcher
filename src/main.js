@@ -30,9 +30,6 @@ const playButton = document.getElementById('play-btn');
 const previewDialog = document.getElementById('preview-dialog');
 const statusMessage = document.getElementById('status-msg');
 const invoke = window.__TAURI__?.core?.invoke;
-if (typeof invoke === 'function') {
-  document.querySelector('.preview-badge').textContent = 'LAUNCHER';
-}
 
 playButton.addEventListener('click', async () => {
   if (playButton.disabled) return;

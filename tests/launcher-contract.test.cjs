@@ -43,7 +43,6 @@ function boot({ invoke, reduced = false, stored = null } = {}) {
   const calls = [];
   let complete;
   const native = boot({invoke(...args) { calls.push(args); return new Promise((resolve, reject) => { complete = {resolve, reject}; }); }});
-  assert.equal(native.badge.textContent, 'LAUNCHER');
   const pendingSuccess = native.click();
   assert.equal(native.nodes['play-btn'].disabled, true);
   assert.equal(native.nodes['play-btn'].attrs['aria-busy'], 'true');
