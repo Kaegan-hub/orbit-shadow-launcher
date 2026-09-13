@@ -1,0 +1,10 @@
+Génération réalisée avec l’outil image_gen intégré.
+Fond original créé pour Orbit Shadow.
+
+Use case: stylized-concept
+Asset type: background artwork for the Windows game launcher "Orbit Shadow". Create only the background artwork, NOT a UI mockup.
+Primary request: A beautifully art-directed cinematic space scene built around a mysterious planet in eclipse, refined and immersive.
+Composition: widescreen landscape 16:10. A large charcoal planet occupies the right half, centered at roughly 73% x, 47% y, its spherical edge outlined by a thin brilliant ice-cyan crescent on the upper right. Fine orbital dust and a very restrained diagonal ring pass behind it. On the left 45%, quiet deep black-blue negative space with only a few tiny stars, suitable for overlaying bright readable launcher title and a play button. Bottom left stays very dark. Planet fully visible with breathing room and a sense of great scale. A subtle tiny distant moon near top center. Do not add spaceships or characters.
+Style: sophisticated science fiction key art, physically believable astronomical light, subtle film texture, rich shadows, precision, exceptionally beautiful atmospheric scattering, elegant restrained color grading. A faint desaturated teal nebula behind the planet and very faint warm light at the extreme lower right add depth. Avoid oversaturation, cartoon rendering, generic purple neon gradients, overly busy starfields, big lens flares.
+Palette: near-black navy (#050a12), icy cyan (#49cef2), slate blue, muted pale gold dust. High-end dark atmosphere.
+Constraints: no text, no typography, no letters, no logo, no interface, no buttons, no border, no watermark. Landscape high resolution.
