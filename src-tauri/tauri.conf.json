@@ -25,6 +25,12 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "windows": {
+      "nsis": {
+        "languages": ["English"],
+        "displayLanguageSelector": false
+      }
+    },
     "resources": {
       "resources/chromium": "chromium"
     },

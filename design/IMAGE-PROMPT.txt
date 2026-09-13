@@ -1,5 +1,5 @@
-Génération réalisée avec l’outil image_gen intégré.
-Fond original créé pour Orbit Shadow.
+Generated with the built-in image_gen tool.
+Original background created for Orbit Shadow.
 
 Use case: stylized-concept
 Asset type: background artwork for the Windows game launcher "Orbit Shadow". Create only the background artwork, NOT a UI mockup.

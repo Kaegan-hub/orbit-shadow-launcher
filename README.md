@@ -1,16 +1,16 @@
 # Orbit Shadow Launcher
 
-Launcher Windows Tauri 2 pour ouvrir Orbit Shadow dans le navigateur de jeu fourni.
+A Windows launcher built with Tauri 2 that opens Orbit Shadow in the bundled game browser.
 
 ## Interface
 
-Le launcher affiche une planète en éclipse, un symbole orbital vectoriel et un bouton Jouer. Le bouton Discord en haut à droite ouvre https://discord.gg/orbit-shadow dans le navigateur par défaut. Le fond est animé avec discrétion ; le bouton « Animations » permet de le figer et la préférence système de réduction des animations est respectée. L’interface tient dans la fenêtre native de 640 × 480 pixels.
+The launcher features an eclipsed planet, an orbital mark and a Play button. The Discord button in the top right opens https://discord.gg/orbit-shadow in the default browser. Subtle background animations can be paused, and the system’s reduced motion preference is respected. The interface fits the native 640 × 480 window. All launcher text, accessibility labels, launch messages and installer screens are in English.
 
-Le frontend se trouve dans `src/` et fonctionne sans CDN ni police distante. Ouvrir `src/index.html` dans un navigateur donne un aperçu visuel. Dans Tauri, Jouer utilise la commande native existante `open_game`. Les demandes simultanées sont bloquées et le bouton redevient disponible après un succès ou une erreur.
+The frontend is in `src/` and runs without a CDN or remote fonts. Open `src/index.html` in a browser to preview it. In Tauri, Play calls the existing native `open_game` command. Concurrent requests are blocked, and the button becomes available again after success or failure.
 
-## Développement et compilation
+## Development and builds
 
-Prérequis Windows : Node.js, Rust stable MSVC, Microsoft C++ Build Tools avec Windows SDK et WebView2. Voir les [prérequis officiels Tauri](https://v2.tauri.app/start/prerequisites/).
+Windows prerequisites: Node.js, stable Rust MSVC, Microsoft C++ Build Tools with the Windows SDK, and WebView2. See the [official Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```powershell
 npm ci
@@ -19,12 +19,12 @@ npm run tauri -- dev
 npm run tauri -- build -- --locked
 ```
 
-L’exécutable se trouve dans `src-tauri/target/release/orbit-shadow-launcher.exe` et l’installateur NSIS dans `src-tauri/target/release/bundle/nsis/`. Le dossier `src-tauri/resources/chromium` est inclus par la configuration de distribution existante.
+The executable is generated at `src-tauri/target/release/orbit-shadow-launcher.exe`, and the NSIS installer is in `src-tauri/target/release/bundle/nsis/`. The existing bundle configuration includes `src-tauri/resources/chromium`. The installer is configured to use English only.
 
-Le workflow `Build Orbit Shadow for Windows` compile cette branche de refonte et conserve l’exécutable et l’installateur dans les artefacts GitHub Actions. Il peut aussi être lancé manuellement une fois présent sur la branche par défaut. Il ne publie pas de release.
+The `Build Orbit Shadow for Windows` workflow builds this redesign branch and saves the executable and installer as GitHub Actions artifacts. It can also be run manually once present on the default branch. It does not publish a release.
 
-## Vérifications
+## Validation
 
-`npm test` vérifie le mode aperçu, le contrat `open_game`, l’absence de doubles lancements pendant une demande, la remise en état après erreur et les préférences d’animation. Ces tests simulent l’API native ; ils ne se connectent pas au jeu.
+`npm test` checks preview mode, the `open_game` contract, protection against concurrent launches, recovery after errors, English status text and animation preferences. These tests simulate the native API and do not connect to the game.
 
-Le fond original `src/assets/orbit-eclipse.png` a été créé pour cette interface avec ImageGen. Son prompt est conservé dans `design/IMAGE-PROMPT.txt`.
+The original background, `src/assets/orbit-eclipse.png`, was created for this interface with ImageGen. Its prompt is saved in `design/IMAGE-PROMPT.txt`.
