@@ -1,5 +1,6 @@
 use std::process::Command;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
+use tauri_plugin_updater::UpdaterExt;
 
 // The real game (all mechanics, real protocol, real server) is a Flash
 // (.swf) client. Modern browsers/WebView2 dropped Flash entirely, and
@@ -59,10 +60,80 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+// Checks the update manifest (see tauri.conf.json's plugins.updater.endpoints)
+// on every launch and, if a newer signed build is published, downloads and
+// installs it automatically, then restarts into the new version -- same
+// flow as Elixia's own launcher (tauri-plugin-updater), just self-hosted:
+// the manifest and installer are served as plain static files from the
+// existing CMS webroot (sites/cms-next/launcher/), no separate update
+// server needed.
+async fn check_for_update(app: tauri::AppHandle) {
+    let updater = match app.updater() {
+        Ok(u) => u,
+        Err(e) => {
+            eprintln!("updater unavailable: {e}");
+            return;
+        }
+    };
+
+    let update = match updater.check().await {
+        Ok(Some(update)) => update,
+        Ok(None) => return, // already up to date
+        Err(e) => {
+            eprintln!("update check failed: {e}");
+            return;
+        }
+    };
+
+    let _ = app.emit(
+        "update-status",
+        format!("Téléchargement de la mise à jour {}...", update.version),
+    );
+
+    let downloaded = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let downloaded_for_progress = downloaded.clone();
+    let app_for_progress = app.clone();
+
+    let result = update
+        .download_and_install(
+            move |chunk_len, total_len| {
+                let total = downloaded_for_progress
+                    .fetch_add(chunk_len, std::sync::atomic::Ordering::Relaxed)
+                    + chunk_len;
+                if let Some(total_len) = total_len {
+                    let total_len = (total_len as usize).max(1);
+                    let _ = app_for_progress.emit("update-progress", (total * 100) / total_len);
+                }
+            },
+            || {
+                let _ = app.emit("update-status", "Installation en cours...".to_string());
+            },
+        )
+        .await;
+
+    match result {
+        Ok(()) => app.request_restart(),
+        Err(e) => {
+            eprintln!("update install failed: {e}");
+            let _ = app.emit(
+                "update-status",
+                format!("Échec de la mise à jour : {e}"),
+            );
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(check_for_update(handle));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![open_game])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

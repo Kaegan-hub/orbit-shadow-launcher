@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Orbit Shadow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "cloud.orbit-shadow.launcher",
   "build": {
     "frontendDist": "../src"
@@ -25,6 +25,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
     "resources": {
       "resources/chromium": "chromium"
     },
@@ -35,5 +36,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE0MjUyQTA1RDJGODgwNDQKUldSRWdQalNCU29sRkJzN3ZuNTVFdU16M09UU3ZUeU5ZZ3pIbWdIai9ZeU5BcmNXVEs2QUtnOHgK",
+      "endpoints": [
+        "https://play.orbit-shadow.cloud/launcher/latest.json"
+      ]
+    }
   }
 }
