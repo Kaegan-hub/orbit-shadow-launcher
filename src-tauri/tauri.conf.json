@@ -12,12 +12,9 @@
       {
         "label": "main",
         "title": "Orbit Shadow",
-        "url": "https://new.orbit-shadow.cloud/",
-        "width": 1280,
-        "height": 800,
-        "minWidth": 1024,
-        "minHeight": 700,
-        "resizable": true,
+        "width": 640,
+        "height": 480,
+        "resizable": false,
         "fullscreen": false
       }
     ],
@@ -27,7 +24,10 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
+    "resources": {
+      "resources/chromium": "chromium"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
