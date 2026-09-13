@@ -1,10 +1,11 @@
 {
   "name": "orbit-shadow-launcher",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "node tests/launcher-contract.test.cjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
