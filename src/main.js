@@ -1,86 +1,20 @@
 'use strict';
 
-const motionButton = document.getElementById('motion-toggle');
-const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-let motionOverride = null;
-try { motionOverride = localStorage.getItem('orbit-shadow-motion'); } catch (_) { /* Storage can be unavailable in local previews. */ }
+// This page is only the local startup splash (see index.html's own
+// comment) -- it exists purely to show update-check/download/install
+// progress before the Rust side (setup() in src-tauri/src/lib.rs)
+// navigates this same window to the real orbit-shadow.cloud site. Nothing
+// here needs to survive past that point, and nothing on the real site
+// depends on this script running.
 
-function setMotion(enabled) {
-  enabled = enabled && !motionPreference.matches;
-  document.body.classList.toggle('motion-paused', !enabled);
-  motionButton.disabled = motionPreference.matches;
-  motionButton.setAttribute('aria-pressed', String(enabled));
-  motionButton.querySelector('span').textContent = motionPreference.matches ? 'Reduced motion' : enabled ? 'Animations on' : 'Animations off';
-}
-
-setMotion(!motionPreference.matches && motionOverride !== 'off');
-motionButton.addEventListener('click', () => {
-  if (motionPreference.matches) return;
-  const enabled = motionButton.getAttribute('aria-pressed') !== 'true';
-  motionOverride = enabled ? 'on' : 'off';
-  setMotion(enabled);
-  try { localStorage.setItem('orbit-shadow-motion', motionOverride); } catch (_) { /* The toggle still works without persistence. */ }
-});
-motionPreference.addEventListener('change', event => {
-  if (event.matches) setMotion(false);
-  else setMotion(motionOverride !== 'off');
-});
-
-const playButton = document.getElementById('play-btn');
-const previewDialog = document.getElementById('preview-dialog');
 const statusMessage = document.getElementById('status-msg');
-const invoke = window.__TAURI__?.core?.invoke;
 const listen = window.__TAURI__?.event?.listen;
 
-// The Rust side checks for an update on every startup (tauri-plugin-updater
-// against https://play.orbit-shadow.cloud/launcher/latest.json) and, if a
-// newer signed version is published, downloads + installs it automatically,
-// then restarts -- these events just keep the user informed while that
-// happens instead of the window looking frozen. No UI is shown at all when
-// already up to date (the common case).
 if (typeof listen === 'function') {
   listen('update-status', (event) => {
-    statusMessage.hidden = false;
-    statusMessage.dataset.state = 'loading';
     statusMessage.textContent = event.payload;
   });
   listen('update-progress', (event) => {
-    statusMessage.hidden = false;
-    statusMessage.dataset.state = 'loading';
-    statusMessage.textContent = `Downloading update... ${event.payload}%`;
+    statusMessage.textContent = `Downloading update… ${event.payload}%`;
   });
 }
-
-playButton.addEventListener('click', async () => {
-  if (playButton.disabled) return;
-  if (typeof invoke !== 'function') {
-    previewDialog.showModal();
-    return;
-  }
-
-  playButton.disabled = true;
-  playButton.setAttribute('aria-busy', 'true');
-  playButton.querySelector('strong').textContent = 'LAUNCHING…';
-  statusMessage.hidden = false;
-  statusMessage.dataset.state = 'loading';
-  statusMessage.textContent = 'Launching the game…';
-  try {
-    // Native command used by the installed Orbit Shadow launcher.
-    await invoke('open_game');
-    statusMessage.dataset.state = 'success';
-    statusMessage.textContent = 'The game is running in a separate window.';
-  } catch (error) {
-    statusMessage.dataset.state = 'error';
-    const detail = typeof error === 'string' ? error : error?.message;
-    statusMessage.textContent = detail ? `Unable to start the game: ${detail}` : 'Unable to start the game. Please try again.';
-  } finally {
-    playButton.disabled = false;
-    playButton.removeAttribute('aria-busy');
-    playButton.querySelector('strong').textContent = 'PLAY';
-  }
-});
-previewDialog.addEventListener('click', event => {
-  if (event.target !== previewDialog) return;
-  const bounds = previewDialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) previewDialog.close();
-});

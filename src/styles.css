@@ -28,12 +28,38 @@ svg { display: block; flex: 0 0 auto; }
 .launcher {
   position: relative;
   isolation: isolate;
-  display: grid;
-  grid-template-rows: 84px minmax(330px, 1fr) 66px;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
   overflow: hidden;
   background: #070d18;
+}
+
+/* Splash screen only (see index.html) -- fills whatever space the topbar
+   above doesn't use. */
+.splash-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+.splash-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(165, 237, 250, .22);
+  border-top-color: var(--cyan-strong);
+  animation: splash-spin 1s linear infinite;
+}
+.splash-status { margin: 0; color: var(--muted); font-size: 13px; letter-spacing: .03em; }
+@keyframes splash-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .splash-spinner { animation: none; }
 }
 
 .scene, .scene-shade, .stars { position: absolute; inset: 0; z-index: -3; pointer-events: none; }

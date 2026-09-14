@@ -1,6 +1,6 @@
 [package]
 name = "orbit-shadow-launcher"
-version = "0.1.7"
+version = "0.1.12"
 description = "Native desktop launcher for Orbit Shadow"
 authors = ["Orbit Shadow"]
 edition = "2021"
@@ -24,6 +24,15 @@ tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tauri-plugin-deep-link = "2"
+tauri-plugin-single-instance = "2"
+tokio = { version = "1.53.1", features = ["time"] }
+# OS credential store (Windows Credential Manager on this target) for the
+# password-manager-style "remember my password" feature -- see
+# save_login/get_saved_password in lib.rs. Never our own encryption: the
+# whole point is using the same trusted, per-Windows-account secure store
+# a real browser's saved passwords already live in.
+keyring = { version = "3", features = ["windows-native"] }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
