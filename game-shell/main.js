@@ -67,10 +67,17 @@ function isAllowedUrl(targetUrl) {
 const PEPFLASH_PATH = path.join(__dirname, "flash", "pepflashplayer.dll");
 app.commandLine.appendSwitch("ppapi-flash-path", PEPFLASH_PATH);
 
+// Fills the screen like a maximized window rather than entering the OS's
+// actual fullscreen mode (fullscreen:true) -- the difference matters: real
+// OS/Chromium fullscreen has its own transition animation, its own
+// Esc-to-exit and F11-toggle handling, and Alt-Tab/multi-monitor quirks
+// that make it feel like "a browser tab went fullscreen", not a native app.
+// frame:false + starting maximized looks identical (no title bar, covers
+// the whole screen) without ever entering that mode at all.
 const WINDOW_DEFAULTS = {
   width: 1280,
   height: 900,
-  fullscreen: true,
+  frame: false,
   autoHideMenuBar: true,
   webPreferences: {
     plugins: true,
@@ -93,6 +100,7 @@ function createWindow(url) {
 
   const win = new BrowserWindow(WINDOW_DEFAULTS);
   win.setMenuBarVisibility(false);
+  win.maximize();
 
   // Anything the page tries to open in a new tab/window (target="_blank",
   // window.open) becomes another clean shell window instead of a bare
