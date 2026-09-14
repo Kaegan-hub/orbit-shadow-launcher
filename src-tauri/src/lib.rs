@@ -20,7 +20,7 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
     let resource_dir = app
         .path()
         .resource_dir()
-        .map_err(|e| format!("resource_dir: {e}"))?;
+        .map_err(|_| "Could not locate the launcher resources.".to_string())?;
     let chromium_dir = resource_dir.join("chromium");
     let chrome_exe = chromium_dir.join("chrome.exe");
     let pepflash_dll = chromium_dir
@@ -29,7 +29,7 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
         .join("pepflashplayer.dll");
 
     if !chrome_exe.exists() {
-        return Err(format!("chrome.exe introuvable: {}", chrome_exe.display()));
+        return Err(format!("Game browser not found: {}", chrome_exe.display()));
     }
 
     // A fresh, per-user, writable profile -- never reuse a profile shipped
@@ -37,9 +37,10 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
     let profile_dir = app
         .path()
         .app_local_data_dir()
-        .map_err(|e| format!("app_local_data_dir: {e}"))?
+        .map_err(|_| "Could not locate the application data folder.".to_string())?
         .join("chromium-profile");
-    std::fs::create_dir_all(&profile_dir).map_err(|e| format!("create profile dir: {e}"))?;
+    std::fs::create_dir_all(&profile_dir)
+        .map_err(|_| "Could not create the game profile folder. Check the folder permissions.".to_string())?;
 
     Command::new(chrome_exe)
         .current_dir(&chromium_dir)
@@ -55,7 +56,7 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
         .arg(format!("--ppapi-flash-version={PEPPERFLASH_VERSION}"))
         .arg(GAME_URL)
         .spawn()
-        .map_err(|e| format!("spawn chrome.exe: {e}"))?;
+        .map_err(|_| "Could not open the game browser. Please try reinstalling Orbit Shadow.".to_string())?;
 
     Ok(())
 }
@@ -87,7 +88,7 @@ async fn check_for_update(app: tauri::AppHandle) {
 
     let _ = app.emit(
         "update-status",
-        format!("Téléchargement de la mise à jour {}...", update.version),
+        format!("Downloading update {}...", update.version),
     );
 
     let downloaded = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -106,7 +107,7 @@ async fn check_for_update(app: tauri::AppHandle) {
                 }
             },
             || {
-                let _ = app.emit("update-status", "Installation en cours...".to_string());
+                let _ = app.emit("update-status", "Installing update...".to_string());
             },
         )
         .await;
@@ -117,7 +118,7 @@ async fn check_for_update(app: tauri::AppHandle) {
             eprintln!("update install failed: {e}");
             let _ = app.emit(
                 "update-status",
-                format!("Échec de la mise à jour : {e}"),
+                format!("Update failed: {e}"),
             );
         }
     }

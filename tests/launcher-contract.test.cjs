@@ -38,26 +38,27 @@ function boot({ invoke, reduced = false, stored = null } = {}) {
   await preview.click();
   assert.equal(preview.nodes['preview-dialog'].showCount, 1);
   assert.equal(preview.nodes['play-btn'].disabled, false);
-  console.log('PASS: sans Tauri, le clic ouvre la modale et ne lance aucun jeu.');
+  console.log('PASS: browser preview opens its dialog without launching the game.');
 
   const calls = [];
   let complete;
   const native = boot({invoke(...args) { calls.push(args); return new Promise((resolve, reject) => { complete = {resolve, reject}; }); }});
-  assert.equal(native.badge.textContent, 'LAUNCHER');
   const pendingSuccess = native.click();
   assert.equal(native.nodes['play-btn'].disabled, true);
   assert.equal(native.nodes['play-btn'].attrs['aria-busy'], 'true');
   assert.equal(native.nodes['status-msg'].dataset.state, 'loading');
+  assert.equal(native.nodes['status-msg'].textContent, 'Launching the game…');
+  assert.equal(native.nodes['play-btn'].querySelector('strong').textContent, 'LAUNCHING…');
   await native.click();
   assert.deepEqual(calls, [['open_game']]);
   complete.resolve();
   await pendingSuccess;
   assert.equal(native.nodes['play-btn'].disabled, false);
   assert.equal(native.nodes['play-btn'].attrs['aria-busy'], undefined);
-  assert.equal(native.nodes['play-btn'].querySelector('strong').textContent, 'JOUER');
+  assert.equal(native.nodes['play-btn'].querySelector('strong').textContent, 'PLAY');
   assert.equal(native.nodes['status-msg'].dataset.state, 'success');
-  assert.equal(native.nodes['status-msg'].textContent, 'Le jeu est lancé dans une fenêtre séparée.');
-  console.log('PASS: open_game appelé une fois pendant la requête; succès, bouton et état rétablis.');
+  assert.equal(native.nodes['status-msg'].textContent, 'The game is running in a separate window.');
+  console.log('PASS: one open_game request at a time; English loading and success messages, button restored.');
 
   const pendingFailure = native.click();
   await native.click();
@@ -67,10 +68,10 @@ function boot({ invoke, reduced = false, stored = null } = {}) {
   await pendingFailure;
   assert.equal(native.nodes['play-btn'].disabled, false);
   assert.equal(native.nodes['play-btn'].attrs['aria-busy'], undefined);
-  assert.equal(native.nodes['play-btn'].querySelector('strong').textContent, 'JOUER');
+  assert.equal(native.nodes['play-btn'].querySelector('strong').textContent, 'PLAY');
   assert.equal(native.nodes['status-msg'].dataset.state, 'error');
-  assert.equal(native.nodes['status-msg'].textContent, 'Impossible de lancer le jeu : ' + errorPayload);
-  console.log('PASS: erreur affichée comme texte littéral; bouton réactivé et nouvelle tentative possible.');
+  assert.equal(native.nodes['status-msg'].textContent, 'Unable to start the game: ' + errorPayload);
+  console.log('PASS: English error message treats details as text; button is ready for another attempt.');
 
   for (const stored of [null, 'on', 'off']) {
     const reduced = boot({reduced: true, stored});
@@ -78,14 +79,14 @@ function boot({ invoke, reduced = false, stored = null } = {}) {
     assert.equal(reduced.classes.has('motion-paused'), true);
     assert.equal(motionToggle.attrs['aria-pressed'], 'false');
     assert.equal(motionToggle.disabled, true);
-    assert.equal(motionToggle.querySelector('span').textContent, 'Animations réduites');
+    assert.equal(motionToggle.querySelector('span').textContent, 'Reduced motion');
     motionToggle.handlers.click();
     assert.equal(reduced.classes.has('motion-paused'), true);
     assert.equal(motionToggle.attrs['aria-pressed'], 'false');
     assert.equal(motionToggle.disabled, true);
-    assert.equal(motionToggle.querySelector('span').textContent, 'Animations réduites');
+    assert.equal(motionToggle.querySelector('span').textContent, 'Reduced motion');
   }
   assert.equal(boot({stored: 'off'}).classes.has('motion-paused'), true);
   assert.equal(boot().classes.has('motion-paused'), false);
-  console.log('PASS: reduced-motion respecté au chargement et au clic; bouton désactivé et libellé exact.');
+  console.log('PASS: reduced motion is respected on load and click; disabled button has an English label.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

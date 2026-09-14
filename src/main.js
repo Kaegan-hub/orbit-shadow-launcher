@@ -10,7 +10,7 @@ function setMotion(enabled) {
   document.body.classList.toggle('motion-paused', !enabled);
   motionButton.disabled = motionPreference.matches;
   motionButton.setAttribute('aria-pressed', String(enabled));
-  motionButton.querySelector('span').textContent = motionPreference.matches ? 'Animations réduites' : enabled ? 'Animations activées' : 'Animations désactivées';
+  motionButton.querySelector('span').textContent = motionPreference.matches ? 'Reduced motion' : enabled ? 'Animations on' : 'Animations off';
 }
 
 setMotion(!motionPreference.matches && motionOverride !== 'off');
@@ -31,9 +31,6 @@ const previewDialog = document.getElementById('preview-dialog');
 const statusMessage = document.getElementById('status-msg');
 const invoke = window.__TAURI__?.core?.invoke;
 const listen = window.__TAURI__?.event?.listen;
-if (typeof invoke === 'function') {
-  document.querySelector('.preview-badge').textContent = 'LAUNCHER';
-}
 
 // The Rust side checks for an update on every startup (tauri-plugin-updater
 // against https://play.orbit-shadow.cloud/launcher/latest.json) and, if a
@@ -50,7 +47,7 @@ if (typeof listen === 'function') {
   listen('update-progress', (event) => {
     statusMessage.hidden = false;
     statusMessage.dataset.state = 'loading';
-    statusMessage.textContent = `Téléchargement de la mise à jour... ${event.payload}%`;
+    statusMessage.textContent = `Downloading update... ${event.payload}%`;
   });
 }
 
@@ -63,23 +60,23 @@ playButton.addEventListener('click', async () => {
 
   playButton.disabled = true;
   playButton.setAttribute('aria-busy', 'true');
-  playButton.querySelector('strong').textContent = 'LANCEMENT…';
+  playButton.querySelector('strong').textContent = 'LAUNCHING…';
   statusMessage.hidden = false;
   statusMessage.dataset.state = 'loading';
-  statusMessage.textContent = 'Lancement du jeu…';
+  statusMessage.textContent = 'Launching the game…';
   try {
     // Native command used by the installed Orbit Shadow launcher.
     await invoke('open_game');
     statusMessage.dataset.state = 'success';
-    statusMessage.textContent = 'Le jeu est lancé dans une fenêtre séparée.';
+    statusMessage.textContent = 'The game is running in a separate window.';
   } catch (error) {
     statusMessage.dataset.state = 'error';
     const detail = typeof error === 'string' ? error : error?.message;
-    statusMessage.textContent = detail ? `Impossible de lancer le jeu : ${detail}` : 'Impossible de lancer le jeu. Veuillez réessayer.';
+    statusMessage.textContent = detail ? `Unable to start the game: ${detail}` : 'Unable to start the game. Please try again.';
   } finally {
     playButton.disabled = false;
     playButton.removeAttribute('aria-busy');
-    playButton.querySelector('strong').textContent = 'JOUER';
+    playButton.querySelector('strong').textContent = 'PLAY';
   }
 });
 previewDialog.addEventListener('click', event => {
