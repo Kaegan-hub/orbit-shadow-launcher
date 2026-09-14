@@ -54,7 +54,14 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
         .arg("--no-proxy-server")
         .arg(format!("--ppapi-flash-path={}", pepflash_dll.display()))
         .arg(format!("--ppapi-flash-version={PEPPERFLASH_VERSION}"))
-        .arg(GAME_URL)
+        // "App mode": a chromeless window (no tabs, no address bar, no
+        // bookmarks bar) -- this is the same underlying technique other
+        // open-source DarkOrbit clients use via Electron (itself a Chromium
+        // wrapper) to look like a native app instead of a browser. Chromium
+        // has supported --app= natively since long before our bundled 2016
+        // build, so this needs nothing extra bundled.
+        .arg(format!("--app={GAME_URL}"))
+        .arg("--window-size=1280,900")
         .spawn()
         .map_err(|_| "Could not open the game browser. Please try reinstalling Orbit Shadow.".to_string())?;
 
