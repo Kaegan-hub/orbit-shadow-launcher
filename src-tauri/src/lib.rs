@@ -6,14 +6,21 @@ use tauri_plugin_updater::UpdaterExt;
 // (.swf) client. Modern browsers/WebView2 dropped Flash entirely, and
 // Ruffle (the open-source Flash emulator) can't run this exact obfuscated
 // build past its loading screen (verified this session, two different
-// Ruffle backends, same result). The actual fix: bundle a real, unmodified,
-// pre-2021 Chromium build (49.0.2623.112) with its official PepperFlash
-// plugin still present -- this predates every Flash kill-switch/EOL block
-// entirely, so it just runs the real client with zero reimplementation.
-// This reuses 100% of the existing game (quests, crafting, Skylab, Company
-// Hierarchy, real UI, everything) instead of rebuilding it in a web client.
+// Ruffle backends, same result). The fix: a small bundled Electron shell
+// (game-shell/) with a real, unmodified, pre-2021 PepperFlash build
+// injected -- this predates every Flash kill-switch/EOL block entirely, so
+// it just runs the real client with zero reimplementation. This reuses
+// 100% of the existing game (quests, crafting, Skylab, Company Hierarchy,
+// real UI, everything) instead of rebuilding it in a web client.
+//
+// Electron instead of raw Chromium specifically because Electron windows
+// have no browser UI at all by default (no address bar, no tabs) -- a raw
+// Chromium window needs an explicit --app= flag for that, and pop-ups from
+// an --app= window (e.g. the CMS's "Play" link opening Map Revolution) are
+// not guaranteed to inherit the chromeless look. game-shell/main.js
+// intercepts every pop-up itself and opens it as another clean shell
+// window, matching how other open-source DarkOrbit clients solve this.
 const GAME_URL: &str = "http://play.orbit-shadow.cloud:8081/";
-const PEPPERFLASH_VERSION: &str = "21.0.0.213";
 
 #[tauri::command]
 fn open_game(app: tauri::AppHandle) -> Result<(), String> {
@@ -21,15 +28,11 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
         .path()
         .resource_dir()
         .map_err(|_| "Could not locate the launcher resources.".to_string())?;
-    let chromium_dir = resource_dir.join("chromium");
-    let chrome_exe = chromium_dir.join("chrome.exe");
-    let pepflash_dll = chromium_dir
-        .join("49.0.2623.112")
-        .join("PepperFlash")
-        .join("pepflashplayer.dll");
+    let shell_dir = resource_dir.join("game-shell");
+    let electron_exe = shell_dir.join("node_modules").join("electron").join("dist").join("electron.exe");
 
-    if !chrome_exe.exists() {
-        return Err(format!("Game browser not found: {}", chrome_exe.display()));
+    if !electron_exe.exists() {
+        return Err(format!("Game shell not found: {}", electron_exe.display()));
     }
 
     // A fresh, per-user, writable profile -- never reuse a profile shipped
@@ -38,32 +41,16 @@ fn open_game(app: tauri::AppHandle) -> Result<(), String> {
         .path()
         .app_local_data_dir()
         .map_err(|_| "Could not locate the application data folder.".to_string())?
-        .join("chromium-profile");
+        .join("game-shell-profile");
     std::fs::create_dir_all(&profile_dir)
         .map_err(|_| "Could not create the game profile folder. Check the folder permissions.".to_string())?;
 
-    Command::new(chrome_exe)
-        .current_dir(&chromium_dir)
-        .arg(format!("--user-data-dir={}", profile_dir.display()))
-        .arg("--no-first-run")
-        .arg("--no-default-browser-check")
-        .arg("--disable-sync")
-        .arg("--disable-translate")
-        .arg("--disable-component-update")
-        .arg("--allow-outdated-plugins")
-        .arg("--no-proxy-server")
-        .arg(format!("--ppapi-flash-path={}", pepflash_dll.display()))
-        .arg(format!("--ppapi-flash-version={PEPPERFLASH_VERSION}"))
-        // "App mode": a chromeless window (no tabs, no address bar, no
-        // bookmarks bar) -- this is the same underlying technique other
-        // open-source DarkOrbit clients use via Electron (itself a Chromium
-        // wrapper) to look like a native app instead of a browser. Chromium
-        // has supported --app= natively since long before our bundled 2016
-        // build, so this needs nothing extra bundled.
-        .arg(format!("--app={GAME_URL}"))
-        .arg("--window-size=1280,900")
+    Command::new(electron_exe)
+        .arg(&shell_dir)
+        .arg(GAME_URL)
+        .env("ELECTRON_USER_DATA_DIR", &profile_dir)
         .spawn()
-        .map_err(|_| "Could not open the game browser. Please try reinstalling Orbit Shadow.".to_string())?;
+        .map_err(|_| "Could not open the game. Please try reinstalling Orbit Shadow.".to_string())?;
 
     Ok(())
 }
