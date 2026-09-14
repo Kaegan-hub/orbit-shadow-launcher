@@ -32,6 +32,7 @@ app.commandLine.appendSwitch("ignore-certificate-errors");
 const WINDOW_DEFAULTS = {
   width: 1280,
   height: 900,
+  fullscreen: true,
   autoHideMenuBar: true,
   webPreferences: {
     plugins: true,
