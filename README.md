@@ -15,11 +15,14 @@ Windows prerequisites: Node.js, stable Rust MSVC, Microsoft C++ Build Tools with
 ```powershell
 npm ci
 npm test
+cd game-shell; npm install; cd ..
 npm run tauri -- dev
 npm run tauri -- build -- --locked
 ```
 
-The executable is generated at `src-tauri/target/release/orbit-shadow-launcher.exe`, and the NSIS installer is in `src-tauri/target/release/bundle/nsis/`. The existing bundle configuration includes `src-tauri/resources/chromium`. The installer is configured to use English only.
+The game itself runs in `game-shell/`, a small bundled Electron app (see "Automatic updates" below -- actually see the comments in `src-tauri/src/lib.rs`'s `open_game` command) with a real PepperFlash build injected, so the game shows in clean windows with no address bar or browser tabs. Its `node_modules/` (which includes the actual Electron binary, well over GitHub's 100 MB per-file limit) is intentionally gitignored like any other `node_modules/` -- run `npm install` inside `game-shell/` before building, exactly like any other Node dependency; `tauri build` bundles the result from `../game-shell` directly (see `bundle.resources` in `tauri.conf.json`), no separate copy is committed.
+
+The executable is generated at `src-tauri/target/release/orbit-shadow-launcher.exe`, and the NSIS installer is in `src-tauri/target/release/bundle/nsis/`. The installer is configured to use English only.
 
 The `Build Orbit Shadow for Windows` workflow builds this redesign branch and saves the executable and installer as GitHub Actions artifacts. It can also be run manually once present on the default branch. It does not publish a release.
 

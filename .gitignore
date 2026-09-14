@@ -1,5 +1,4 @@
 node_modules/
-!src-tauri/resources/game-shell/node_modules/
 src-tauri/target/
 dist/
 src-tauri/signing.key

@@ -33,7 +33,10 @@
       }
     },
     "resources": {
-      "resources/game-shell": "game-shell"
+      "../game-shell/main.js": "game-shell/main.js",
+      "../game-shell/package.json": "game-shell/package.json",
+      "../game-shell/flash": "game-shell/flash",
+      "../game-shell/node_modules": "game-shell/node_modules"
     },
     "icon": [
       "icons/32x32.png",
