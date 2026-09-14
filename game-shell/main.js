@@ -71,13 +71,15 @@ app.commandLine.appendSwitch("ppapi-flash-path", PEPFLASH_PATH);
 // actual fullscreen mode (fullscreen:true) -- the difference matters: real
 // OS/Chromium fullscreen has its own transition animation, its own
 // Esc-to-exit and F11-toggle handling, and Alt-Tab/multi-monitor quirks
-// that make it feel like "a browser tab went fullscreen", not a native app.
-// frame:false + starting maximized looks identical (no title bar, covers
-// the whole screen) without ever entering that mode at all.
+// that make it feel like "a browser tab went fullscreen", not a native app,
+// AND it hides the taskbar and the window's own title bar/close button --
+// user feedback was explicit that both need to stay visible. So: a normal
+// (framed) window, just started maximized. autoHideMenuBar only hides the
+// File/Edit/View menu strip below the title bar, not the title bar itself
+// -- the X/minimize/maximize buttons stay.
 const WINDOW_DEFAULTS = {
   width: 1280,
   height: 900,
-  frame: false,
   autoHideMenuBar: true,
   webPreferences: {
     plugins: true,
